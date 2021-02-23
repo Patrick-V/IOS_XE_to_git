@@ -1,9 +1,9 @@
 
 Building configuration...
 
-Current configuration : 4323 bytes
+Current configuration : 5348 bytes
 !
-! Last configuration change at 16:09:36 UTC Mon Feb 22 2021 by NETCONF
+! Last configuration change at 09:40:58 UTC Tue Feb 23 2021 by developer
 !
 version 16.9
 service timestamps debug datetime msec
@@ -17,6 +17,44 @@ hostname csr1000v-1
 boot-start-marker
 boot-end-marker
 !
+!
+vrf definition blue
+ description Blue VRF
+ rd 1:410
+ !
+ address-family ipv4
+  route-target export 1:410
+  route-target import 1:410
+ exit-address-family
+!
+vrf definition green
+ description Green VRF
+ rd 1:420
+ !
+ address-family ipv4
+  route-target export 1:420
+  route-target import 1:420
+ exit-address-family
+!
+vrf definition podrick
+ description podrick VRF
+ rd 1:28
+ !
+ address-family ipv4
+  route-target export 1:28
+  route-target import 1:28
+ exit-address-family
+!
+vrf definition red
+ description Red VRF
+ rd 1:400
+ !
+ address-family ipv4
+  route-target export 1:400
+  route-target import 1:410
+  route-target import 1:420
+  route-target import 1:400
+ exit-address-family
 !
 no logging console
 enable secret 5 $1$20ue$uC.uSGo6nvfWs63EjjzRP.
@@ -136,9 +174,25 @@ redundancy
 ! 
 !
 !
-interface Loopback128
- description Pod Number 28
- ip address 10.111.28.2 255.255.255.255
+interface Loopback1128
+ description Pod Number 1128
+ vrf forwarding red
+ ip address 10.28.11.1 255.255.255.255
+!
+interface Loopback1228
+ description Pod Number 1228
+ vrf forwarding blue
+ ip address 10.28.12.1 255.255.255.255
+!
+interface Loopback1328
+ description Pod Number 1328
+ vrf forwarding green
+ ip address 10.28.13.1 255.255.255.255
+!
+interface Loopback1428
+ description Pod Number 1428
+ vrf forwarding podrick
+ ip address 10.28.14.1 255.255.255.255
 !
 interface GigabitEthernet1
  description MANAGEMENT INTERFACE - DON'T TOUCH ME
@@ -200,7 +254,6 @@ line vty 0 4
  login local
  transport input ssh
 !
-ntp server 10.111.28.66
 !
 !
 !
